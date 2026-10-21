@@ -1,0 +1,4 @@
+Run this command in focus-flair directory to install socket.io-client:
+npm install socket.io-client
+
+This is required for real-time tab monitoring features.

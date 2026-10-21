@@ -1,0 +1,93 @@
+version: "3.8"
+
+services:
+  # 1. Centralized Redis Store
+  redis:
+    image: redis:7-alpine
+    container_name: focusflair-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "volatile-lru"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - focusflair-net
+
+  # 2. Backend API Instance 1
+  api-instance-1:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: focusflair-api-1
+    restart: always
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - RUN_EMBEDDED_WORKER=false
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - redis
+    networks:
+      - focusflair-net
+
+  # 3. Backend API Instance 2 (Horizontally Scaled Replica)
+  api-instance-2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: focusflair-api-2
+    restart: always
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - RUN_EMBEDDED_WORKER=false
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - redis
+    networks:
+      - focusflair-net
+
+  # 4. Dedicated Background BullMQ Worker
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: focusflair-worker
+    command: ["node", "workers/index.js"]
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - redis
+    networks:
+      - focusflair-net
+
+  # 5. Nginx Load Balancer (Distributes traffic across api-instance-1 and api-instance-2)
+  load-balancer:
+    image: nginx:alpine
+    container_name: focusflair-lb
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nginx.docker.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api-instance-1
+      - api-instance-2
+    networks:
+      - focusflair-net
+
+networks:
+  focusflair-net:
+    driver: bridge
+
+volumes:
+  redis_data:

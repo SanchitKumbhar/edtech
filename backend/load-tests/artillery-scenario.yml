@@ -1,0 +1,31 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    - duration: 30
+      arrivalRate: 10
+      name: "Warm-up phase"
+    - duration: 60
+      arrivalRate: 50
+      rampTo: 150
+      name: "Ramp up load"
+    - duration: 60
+      arrivalRate: 150
+      name: "Sustained high concurrency"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Browsing syllabus, health, and public exams"
+    flow:
+      - get:
+          url: "/api/health"
+      - get:
+          url: "/api/health/readiness"
+      - get:
+          url: "/api/syllabus/classes"
+      - get:
+          url: "/api/syllabus/topics?classLevel=Class%2010"
+      - think: 1
+      - get:
+          url: "/api/leaderboard?boardType=weekly"
