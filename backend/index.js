@@ -53,9 +53,39 @@ app.use((req, res, next) => {
 });
 
 // ✅ CORS CONFIG
-const allowedOrigin = process.env.CORS_ORIGIN || "http://localhost:8080";
+const defaultOrigins = [
+  "http://localhost:8080",
+  "http://127.0.0.1:8080",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+];
+
+const configuredOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const allowedOriginsSet = new Set([...defaultOrigins, ...configuredOrigins]);
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  if (process.env.CORS_ORIGIN === "*") return true;
+  if (allowedOriginsSet.has(origin)) return true;
+  if (process.env.NODE_ENV !== "production" && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    return true;
+  }
+  return false;
+};
+
 const corsOptions = {
-  origin: allowedOrigin === "*" ? true : allowedOrigin,
+  origin: (origin, callback) => {
+    if (isOriginAllowed(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id"],
   credentials: true,

@@ -163,14 +163,6 @@ const getExamById = asyncHandler(async (req, res) => {
   res.status(200).json(exam);
 });
 
-  if (!exam) {
-    res.status(404);
-    throw new Error("Exam not found");
-  }
-
-  res.status(200).json(exam);
-});
-
 const updateExam = asyncHandler(async (req, res) => {
   const examId = req.params.examId || req.params.id;
   const payload = { ...req.body };

@@ -53,11 +53,33 @@ const socketAuthMiddleware = (socket, next) => {
  * Initialize Socket.IO server with Redis adapter and events
  */
 const initSocketServer = (httpServer) => {
-  const allowedOrigin = process.env.CORS_ORIGIN || "http://localhost:8080";
+  const defaultOrigins = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ];
+
+  const configuredOrigins = (process.env.CORS_ORIGIN || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+  const allowedOriginsSet = new Set([...defaultOrigins, ...configuredOrigins]);
 
   const io = new Server(httpServer, {
     cors: {
-      origin: allowedOrigin === "*" ? true : allowedOrigin,
+      origin: (origin, callback) => {
+        if (!origin || origin === "null") return callback(null, true);
+        if (process.env.CORS_ORIGIN === "*") return callback(null, true);
+        if (allowedOriginsSet.has(origin)) return callback(null, true);
+        if (process.env.NODE_ENV !== "production" && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+          return callback(null, true);
+        }
+        return callback(null, false);
+      },
       methods: ["GET", "POST"],
       credentials: true,
     },
