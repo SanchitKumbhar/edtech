@@ -258,6 +258,122 @@ const listAllInstitutes = asyncHandler(async (req, res) => {
   res.status(200).json(enriched);
 });
 
+/**
+ * List all admins belonging to the current admin's institute
+ */
+const getInstituteAdmins = asyncHandler(async (req, res) => {
+  let instituteId = req.user.instituteId;
+  if (!instituteId) {
+    const owned = await Institute.findOne({ adminUserId: req.user._id });
+    if (owned) {
+      instituteId = owned._id;
+      await User.findByIdAndUpdate(req.user._id, { instituteId });
+    } else {
+      const defaultInst = await Institute.findOne();
+      if (defaultInst) {
+        instituteId = defaultInst._id;
+        await User.findByIdAndUpdate(req.user._id, { instituteId });
+      }
+    }
+  }
+
+  const query = instituteId ? { instituteId, role: "admin" } : { role: "admin" };
+  const admins = await User.find(query).select("-passwordHash").sort({ createdAt: 1 }).lean();
+
+  res.status(200).json({
+    admins,
+    count: admins.length,
+    maxAllowed: 5,
+    remaining: Math.max(0, 5 - admins.length),
+  });
+});
+
+/**
+ * Create another admin for the current admin's institute (limit 5 per institute)
+ */
+const createInstituteAdmin = asyncHandler(async (req, res) => {
+  const { fullName, email, password } = req.body;
+
+  if (!fullName || !email || !password) {
+    res.status(400);
+    throw new Error("Full name, email, and password are required");
+  }
+
+  if (password.length < 6) {
+    res.status(400);
+    throw new Error("Password must be at least 6 characters long");
+  }
+
+  let instituteId = req.user.instituteId;
+  let institute = null;
+
+  if (instituteId) {
+    institute = await Institute.findById(instituteId);
+  } else {
+    institute = await Institute.findOne({ adminUserId: req.user._id });
+    if (!institute) {
+      institute = await Institute.findOne();
+    }
+    if (institute) {
+      instituteId = institute._id;
+      await User.findByIdAndUpdate(req.user._id, { instituteId });
+    }
+  }
+
+  if (!instituteId) {
+    const newInst = await Institute.create({
+      name: "Main Institute",
+      code: "MAIN" + Math.floor(100 + Math.random() * 900),
+      adminUserId: req.user._id,
+    });
+    instituteId = newInst._id;
+    institute = newInst;
+    await User.findByIdAndUpdate(req.user._id, { instituteId });
+  }
+
+  // Enforce 5-admin limit per institute
+  const currentCount = await User.countDocuments({ instituteId, role: "admin" });
+  if (currentCount >= 5) {
+    res.status(400);
+    throw new Error("Maximum limit of 5 admins reached for this institute. You cannot create more admins.");
+  }
+
+  // Check email uniqueness
+  const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+  if (existingUser) {
+    res.status(409);
+    throw new Error("A user with this email address already exists.");
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+  const newAdmin = await User.create({
+    fullName: fullName.trim(),
+    email: email.toLowerCase().trim(),
+    passwordHash,
+    role: "admin",
+    instituteId,
+  });
+
+  await AdminProfile.create({
+    userId: newAdmin._id,
+    instituteName: institute?.name || "Institute",
+  });
+
+  res.status(201).json({
+    message: "Admin created successfully",
+    admin: {
+      _id: newAdmin._id,
+      fullName: newAdmin.fullName,
+      email: newAdmin.email,
+      role: newAdmin.role,
+      createdAt: newAdmin.createdAt,
+    },
+    count: currentCount + 1,
+    maxAllowed: 5,
+    remaining: Math.max(0, 4 - currentCount),
+  });
+});
+
 module.exports = {
   registerInstitute,
   validateInstituteCode,
@@ -265,4 +381,6 @@ module.exports = {
   updateMyInstitute,
   listPublicInstitutes,
   listAllInstitutes,
+  getInstituteAdmins,
+  createInstituteAdmin,
 };

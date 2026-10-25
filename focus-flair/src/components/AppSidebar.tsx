@@ -31,9 +31,11 @@ const studentNav = [
 const adminNav = [
   { label: "Dashboard", path: "/admin", icon: LayoutDashboard },
   { label: "Exams", path: "/admin/exams", icon: FileText },
+  { label: "Exam Scores", path: "/admin/exam-scores", icon: FileText },
   { label: "Syllabus", path: "/admin/syllabus", icon: GraduationCap },
   { label: "Create Exam", path: "/admin/create-exam", icon: PlusCircle },
   { label: "Create Practice", path: "/admin/create-practice", icon: Gamepad2 },
+  { label: "PYQ Papers", path: "/admin/pyq", icon: BookOpen },
   { label: "Notices", path: "/admin/notices", icon: FileText },
   { label: "Monitoring", path: "/admin/monitoring", icon: Eye },
   { label: "Students", path: "/admin/students", icon: Users },

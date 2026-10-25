@@ -92,9 +92,9 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// ✅ Body parsers with bounded memory size limits
-app.use(express.json({ limit: "2mb" }));
-app.use(express.urlencoded({ extended: true, limit: "2mb" }));
+// ✅ Body parsers with bounded memory size limits (supports PDF uploads)
+app.use(express.json({ limit: "25mb" }));
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 
 // PORT
 const PORT = process.env.PORT || 5000;

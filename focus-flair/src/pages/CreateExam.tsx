@@ -300,23 +300,35 @@ export default function CreateExam() {
             </div>
 
             <div className="grid sm:grid-cols-3 gap-3">
-              <Input
-                value={questionDraft.correctOption}
-                onChange={(e) => setQuestionDraft({ ...questionDraft, correctOption: e.target.value as "A" | "B" | "C" | "D" })}
-                placeholder="Correct Option"
-              />
-              <Input
-                type="number"
-                value={questionDraft.marks}
-                onChange={(e) => setQuestionDraft({ ...questionDraft, marks: Number(e.target.value || 0) })}
-                placeholder="Marks"
-              />
-              <Input
-                type="number"
-                value={questionDraft.negativeMarks}
-                onChange={(e) => setQuestionDraft({ ...questionDraft, negativeMarks: Number(e.target.value || 0) })}
-                placeholder="Negative Marks"
-              />
+              <div className="space-y-1.5">
+                <Label htmlFor="correct-option">Correct Option *</Label>
+                <Input
+                  id="correct-option"
+                  value={questionDraft.correctOption}
+                  onChange={(e) => setQuestionDraft({ ...questionDraft, correctOption: e.target.value as "A" | "B" | "C" | "D" })}
+                  placeholder="e.g., A, B, C, or D"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="correct-marks">Correct Marks (+)</Label>
+                <Input
+                  id="correct-marks"
+                  type="number"
+                  value={questionDraft.marks}
+                  onChange={(e) => setQuestionDraft({ ...questionDraft, marks: Number(e.target.value || 0) })}
+                  placeholder="e.g., 4"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="negative-marks">Negative Marks (-)</Label>
+                <Input
+                  id="negative-marks"
+                  type="number"
+                  value={questionDraft.negativeMarks}
+                  onChange={(e) => setQuestionDraft({ ...questionDraft, negativeMarks: Number(e.target.value || 0) })}
+                  placeholder="e.g., 1"
+                />
+              </div>
             </div>
 
             <Button variant="outline" size="sm" onClick={addQuestion}>

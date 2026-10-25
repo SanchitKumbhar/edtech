@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { PlusCircle, Loader2 } from "lucide-react";
 import { apiRequest } from "@/lib/api";
 
 type Difficulty = "easy" | "medium" | "hard";
@@ -252,38 +252,6 @@ export default function PracticeQuestionBuilder() {
     const num = Number(raw?.trim());
     return Number.isFinite(num) && num > 0 ? Math.floor(num) : undefined;
   };
-
-  const { data: existingQuestions = [], isLoading: questionListLoading } = useQuery<any[]>({
-    queryKey: ["adminPracticeQuestions", selectedTopicId],
-    queryFn: () => apiRequest<any[]>(`/practice/topics/${selectedTopicId}/questions`),
-    enabled: Boolean(selectedTopicId),
-  });
-
-  const [previewPage, setPreviewPage] = useState(1);
-  const [previewPageSize, setPreviewPageSize] = useState(10);
-  const [previewDifficultyFilter, setPreviewDifficultyFilter] = useState<"all" | Difficulty>("all");
-
-  useEffect(() => {
-    setPreviewPage(1);
-  }, [selectedTopicId, previewDifficultyFilter]);
-
-  const filteredLiveQuestions = useMemo(() => {
-    if (previewDifficultyFilter === "all") return existingQuestions;
-    return existingQuestions.filter((q) => q.difficulty === previewDifficultyFilter);
-  }, [existingQuestions, previewDifficultyFilter]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredLiveQuestions.length / previewPageSize));
-
-  useEffect(() => {
-    if (previewPage > totalPages) {
-      setPreviewPage(totalPages);
-    }
-  }, [totalPages, previewPage]);
-
-  const paginatedQuestions = useMemo(() => {
-    const startIndex = (previewPage - 1) * previewPageSize;
-    return filteredLiveQuestions.slice(startIndex, startIndex + previewPageSize);
-  }, [filteredLiveQuestions, previewPage, previewPageSize]);
 
   const createMutation = useMutation({
     mutationFn: async () => {
@@ -628,76 +596,33 @@ export default function PracticeQuestionBuilder() {
             </select>
           </div>
 
-          {form.difficulty === "easy" ? (
-            <div className="space-y-2">
-              <Label>Easy -&gt; Medium Unlock (correct count)</Label>
-              <Input
-                type="number"
-                min={1}
-                value={easyToMediumUnlockCount}
-                onChange={(e) => setEasyToMediumUnlockCount(e.target.value)}
-                placeholder="Leave empty = all Easy questions"
-              />
-            </div>
-          ) : null}
-
-          {form.difficulty === "easy" ? (
-            <div className="space-y-2">
-              <Label>Easy Practice Question Count</Label>
-              <Input
-                type="number"
-                min={1}
-                value={practiceCountEasy}
-                onChange={(e) => setPracticeCountEasy(e.target.value)}
-                placeholder="Leave empty = use all Easy questions"
-              />
-            </div>
-          ) : null}
-
-          {form.difficulty === "medium" ? (
-            <div className="space-y-2">
-              <Label>Medium -&gt; Hard Unlock (correct count)</Label>
-              <Input
-                type="number"
-                min={1}
-                value={mediumToHardUnlockCount}
-                onChange={(e) => setMediumToHardUnlockCount(e.target.value)}
-                placeholder="Leave empty = all Medium questions"
-              />
-            </div>
-          ) : null}
-
-          {form.difficulty === "medium" ? (
-            <div className="space-y-2">
-              <Label>Medium Practice Question Count</Label>
-              <Input
-                type="number"
-                min={1}
-                value={practiceCountMedium}
-                onChange={(e) => setPracticeCountMedium(e.target.value)}
-                placeholder="Leave empty = use all Medium questions"
-              />
-            </div>
-          ) : null}
-
-          {form.difficulty === "hard" ? (
-            <div className="space-y-2">
-              <Label>Hard Practice Question Count</Label>
-              <Input
-                type="number"
-                min={1}
-                value={practiceCountHard}
-                onChange={(e) => setPracticeCountHard(e.target.value)}
-                placeholder="Leave empty = use all Hard questions"
-              />
-            </div>
-          ) : null}
-
-          {form.difficulty === "hard" ? (
-            <div className="space-y-2 sm:col-span-2">
-              <p className="text-sm text-muted-foreground">No unlock-setting field is required while creating HARD questions.</p>
-            </div>
-          ) : null}
+          <div className="space-y-2">
+            <Label>Difficulty Level Total Question Count</Label>
+            <Input
+              type="number"
+              min={1}
+              value={
+                form.difficulty === "easy"
+                  ? practiceCountEasy
+                  : form.difficulty === "medium"
+                  ? practiceCountMedium
+                  : practiceCountHard
+              }
+              onChange={(e) => {
+                const val = e.target.value;
+                if (form.difficulty === "easy") {
+                  setPracticeCountEasy(val);
+                  setEasyToMediumUnlockCount(val);
+                } else if (form.difficulty === "medium") {
+                  setPracticeCountMedium(val);
+                  setMediumToHardUnlockCount(val);
+                } else {
+                  setPracticeCountHard(val);
+                }
+              }}
+              placeholder={`Total questions for ${form.difficulty.toUpperCase()} level`}
+            />
+          </div>
         </div>
 
         {entryMode === "manual" ? (
@@ -771,41 +696,13 @@ export default function PracticeQuestionBuilder() {
               <p className="text-muted-foreground">Only question/options/correct option should be in CSV. Topic, class, subject, difficulty and points come from the widgets on this page.</p>
             </div>
 
-            <div className="grid sm:grid-cols-3 gap-3">
+            <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Points Reward (per question)</Label>
                 <Input
                   type="number"
                   value={form.pointsReward}
                   onChange={(e) => setForm({ ...form, pointsReward: Number(e.target.value || 0) })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>
-                  {form.difficulty === "easy"
-                    ? "Easy Questions Count"
-                    : form.difficulty === "medium"
-                    ? "Medium Questions Count"
-                    : "Hard Questions Count"}{" "}
-                  (Count Input)
-                </Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={
-                    form.difficulty === "easy"
-                      ? practiceCountEasy
-                      : form.difficulty === "medium"
-                      ? practiceCountMedium
-                      : practiceCountHard
-                  }
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (form.difficulty === "easy") setPracticeCountEasy(val);
-                    else if (form.difficulty === "medium") setPracticeCountMedium(val);
-                    else setPracticeCountHard(val);
-                  }}
-                  placeholder="e.g. 10 (leave empty = all)"
                 />
               </div>
               <div className="space-y-2">
@@ -873,224 +770,6 @@ export default function PracticeQuestionBuilder() {
         </Button>
 
         {statusText ? <p className="text-sm text-primary">{statusText}</p> : null}
-      </div>
-
-      <div className="glass-card rounded-xl p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h2 className="font-semibold text-lg">Live Questions: {classLevel} / {subject || "Subject"} / {selectedTopicLabel}</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Total {filteredLiveQuestions.length} question{filteredLiveQuestions.length === 1 ? "" : "s"}
-              {previewDifficultyFilter !== "all" ? ` (${previewDifficultyFilter.toUpperCase()})` : ""}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-1.5 bg-background/80 p-1 rounded-lg border border-border">
-            {(["all", "easy", "medium", "hard"] as const).map((filter) => (
-              <button
-                key={filter}
-                type="button"
-                onClick={() => setPreviewDifficultyFilter(filter)}
-                className={`px-2.5 py-1 text-xs rounded-md font-medium transition-colors ${
-                  previewDifficultyFilter === filter
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                {filter === "all" ? "All" : filter.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {questionListLoading ? (
-          <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
-            <Loader2 className="w-5 h-5 animate-spin text-primary" /> Loading questions...
-          </div>
-        ) : !existingQuestions.length ? (
-          <div className="text-center py-8 text-sm text-muted-foreground">
-            No questions added for this topic yet.
-          </div>
-        ) : !filteredLiveQuestions.length ? (
-          <div className="text-center py-8 text-sm text-muted-foreground">
-            No {previewDifficultyFilter.toUpperCase()} questions found for this topic.
-          </div>
-        ) : (
-          <>
-            <div className="space-y-3">
-              {paginatedQuestions.map((q, idx) => {
-                const questionNumber = (previewPage - 1) * previewPageSize + idx + 1;
-                const difficultyBadgeClass =
-                  q.difficulty === "easy"
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                    : q.difficulty === "medium"
-                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
-                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
-
-                return (
-                  <div key={q._id || idx} className="rounded-xl border border-border p-4 bg-background/70 space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-muted text-foreground">
-                          #{questionNumber}
-                        </span>
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                          {selectedTopicLabel}
-                        </span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full uppercase border font-medium ${difficultyBadgeClass}`}>
-                          {q.difficulty}
-                        </span>
-                      </div>
-                      {q.pointsReward !== undefined ? (
-                        <span className="text-xs font-medium text-muted-foreground">
-                          +{q.pointsReward} pts
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <p className="font-medium text-sm text-foreground">{q.questionText}</p>
-
-                    {Array.isArray(q.options) && q.options.length > 0 ? (
-                      <div className="grid sm:grid-cols-2 gap-2 pt-1">
-                        {q.options.map((opt: any, optIdx: number) => {
-                          const label = opt.label || String.fromCharCode(65 + optIdx);
-                          const isCorrect = Boolean(opt.isCorrect);
-
-                          return (
-                            <div
-                              key={opt._id || optIdx}
-                              className={`text-xs p-2 rounded-lg border flex items-center gap-2 ${
-                                isCorrect
-                                  ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-medium"
-                                  : "bg-muted/40 border-border/60 text-muted-foreground"
-                              }`}
-                            >
-                              <span
-                                className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold ${
-                                  isCorrect
-                                    ? "bg-emerald-500 text-white"
-                                    : "bg-muted text-muted-foreground"
-                                }`}
-                              >
-                                {label}
-                              </span>
-                              <span className="flex-1 truncate">{opt.text}</span>
-                              {isCorrect ? (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0 font-semibold">
-                                  Correct
-                                </span>
-                              ) : null}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-border/80">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>
-                  Showing {(previewPage - 1) * previewPageSize + 1} -{" "}
-                  {Math.min(previewPage * previewPageSize, filteredLiveQuestions.length)} of{" "}
-                  {filteredLiveQuestions.length} questions
-                </span>
-                <span className="text-border">|</span>
-                <label className="flex items-center gap-1.5">
-                  <span>Per page:</span>
-                  <select
-                    className="h-7 text-xs rounded border border-input bg-background px-1.5"
-                    value={previewPageSize}
-                    onChange={(e) => {
-                      setPreviewPageSize(Number(e.target.value));
-                      setPreviewPage(1);
-                    }}
-                  >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                  </select>
-                </label>
-              </div>
-
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setPreviewPage(1)}
-                  disabled={previewPage <= 1}
-                  title="First Page"
-                >
-                  <ChevronsLeft className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setPreviewPage((p) => Math.max(1, p - 1))}
-                  disabled={previewPage <= 1}
-                  title="Previous Page"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-
-                <div className="flex items-center gap-1 px-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((page) => {
-                      if (totalPages <= 5) return true;
-                      if (page === 1 || page === totalPages) return true;
-                      return Math.abs(page - previewPage) <= 1;
-                    })
-                    .map((page, index, array) => {
-                      const prev = array[index - 1];
-                      const showEllipsis = prev && page - prev > 1;
-
-                      return (
-                        <div key={page} className="flex items-center">
-                          {showEllipsis ? <span className="px-1 text-xs text-muted-foreground">...</span> : null}
-                          <Button
-                            variant={previewPage === page ? "default" : "outline"}
-                            size="icon"
-                            className={`h-8 w-8 text-xs ${
-                              previewPage === page ? "gradient-primary text-primary-foreground font-semibold" : ""
-                            }`}
-                            onClick={() => setPreviewPage(page)}
-                          >
-                            {page}
-                          </Button>
-                        </div>
-                      );
-                    })}
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setPreviewPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={previewPage >= totalPages}
-                  title="Next Page"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setPreviewPage(totalPages)}
-                  disabled={previewPage >= totalPages}
-                  title="Last Page"
-                >
-                  <ChevronsRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );

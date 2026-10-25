@@ -623,6 +623,87 @@ const getExamSession = asyncHandler(async (req, res) => {
   res.status(200).json({ session, attempts });
 });
 
+const listMyExamSessions = asyncHandler(async (req, res) => {
+  const sessions = await ExamSession.find({
+    studentId: req.user._id,
+    status: { $in: ["submitted", "auto_submitted"] },
+  })
+    .populate({
+      path: "examId",
+      select: "title examCode examType classLevel durationMinutes totalQuestions maxMarks",
+    })
+    .sort({ submittedAt: -1 })
+    .lean();
+
+  res.status(200).json(sessions);
+});
+
+const getExamSessionReview = asyncHandler(async (req, res) => {
+  const session = await ExamSession.findById(req.params.sessionId)
+    .populate({
+      path: "examId",
+      select: "title examCode examType classLevel durationMinutes totalQuestions maxMarks markingScheme rules",
+    })
+    .lean();
+
+  if (!session) {
+    res.status(404);
+    throw new Error("Session not found");
+  }
+
+  if (req.user.role === "student" && session.studentId.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error("Forbidden");
+  }
+
+  const questions = await ExamQuestion.find({ examId: session.examId._id })
+    .sort({ questionNo: 1 })
+    .lean();
+
+  const attempts = await QuestionAttempt.find({ sessionId: session._id }).lean();
+  const attemptMap = new Map();
+  attempts.forEach((a) => {
+    attemptMap.set(a.questionId.toString(), a);
+  });
+
+  const questionReviews = questions.map((q) => {
+    const attempt = attemptMap.get(q._id.toString());
+    const selectedOption = q.options?.find(
+      (opt) => opt._id.toString() === attempt?.selectedOptionId?.toString()
+    );
+    const correctOption = q.options?.find((opt) => opt.isCorrect);
+
+    return {
+      _id: q._id,
+      questionNo: q.questionNo,
+      questionText: q.questionText,
+      subject: q.subject,
+      topic: q.topic,
+      difficulty: q.difficulty,
+      marks: q.marks,
+      negativeMarks: q.negativeMarks,
+      options: q.options.map((opt) => ({
+        _id: opt._id,
+        label: opt.label,
+        text: opt.text,
+        isCorrect: opt.isCorrect,
+      })),
+      selectedOptionId: attempt?.selectedOptionId || null,
+      selectedOptionLabel: selectedOption?.label || null,
+      correctOptionLabel: correctOption?.label || null,
+      isAttempted: Boolean(attempt && attempt.selectedOptionId),
+      isCorrect: Boolean(attempt?.isCorrect),
+      marksAwarded: attempt?.marksAwarded ?? 0,
+      explanation: q.explanation || "No explanation provided.",
+    };
+  });
+
+  res.status(200).json({
+    session,
+    questions: questionReviews,
+  });
+});
+
 module.exports = {
   createExam,
   validateExamCodeEntry,
@@ -639,4 +720,6 @@ module.exports = {
   submitExamSession,
   getExamSession,
   listSubmittedExamScores,
+  listMyExamSessions,
+  getExamSessionReview,
 };

@@ -70,7 +70,14 @@ const processExamResultJob = async (job) => {
     );
   }
 
-  // 4. Invalidate related caches
+  // 4. Evaluate gamification badges
+  const { evaluateBadges } = require("../utils/badgeService");
+  const unlockedBadges = await evaluateBadges(studentId);
+  if (unlockedBadges.length > 0) {
+    console.log(`[Worker] Student ${studentId} unlocked ${unlockedBadges.length} new badges!`);
+  }
+
+  // 5. Invalidate related caches
   await cache.delPattern(`dashboard:student:${studentId}`);
   await cache.delPattern("leaderboard:*");
 

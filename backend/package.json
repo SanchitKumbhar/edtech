@@ -8,7 +8,7 @@
     "start": "node index.js",
     "worker": "node workers/index.js",
     "lb": "node scripts/local-load-balancer.js",
-    "test": "node --test test/",
+    "test": "node --test \"test/**/*.test.js\"",
     "seed:test-data": "node scripts/seed-test-data.js",
     "seed:test-data:reset": "node scripts/seed-test-data.js --reset"
   },

@@ -70,6 +70,7 @@ const App = () => (
                 <Route path="/admin/students" element={<StudentManagement />} />
                 <Route path="/admin/profile" element={<AdminProfile />} />
                 <Route path="/admin/exam-scores" element={<AdminExamScores />} />
+                <Route path="/admin/pyq" element={<PYQSection />} />
               </Route>
             </Route>
           </Route>

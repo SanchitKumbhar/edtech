@@ -140,6 +140,96 @@ export default function StudentProfile() {
           </div>
         ))}
       </div>
+
+      {/* Badges & Achievements Showcase */}
+      <StudentBadgesSection studentId={profileUser?._id} />
+    </div>
+  );
+}
+
+function StudentBadgesSection({ studentId }: { studentId?: string }) {
+  const { data: badgesData, isLoading } = useQuery<{
+    badges: Array<{
+      _id: string;
+      code: string;
+      title: string;
+      description: string;
+      icon: string;
+      pointsReward: number;
+      isUnlocked: boolean;
+      unlockedAt?: string;
+    }>;
+    stats: { total: number; unlockedCount: number };
+  }>({
+    queryKey: ["studentBadges", studentId],
+    queryFn: () => apiRequest(`/leaderboard/students/${studentId}`),
+    enabled: Boolean(studentId),
+  });
+
+  if (isLoading || !badgesData?.badges) {
+    return null;
+  }
+
+  const { badges, stats } = badgesData;
+  const progressPct = stats.total > 0 ? Math.round((stats.unlockedCount / stats.total) * 100) : 0;
+
+  return (
+    <div className="glass-card rounded-xl p-6 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            🏆 Badges & Achievements
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Unlocked {stats.unlockedCount} of {stats.total} badges ({progressPct}%)
+          </p>
+        </div>
+        <div className="w-full sm:w-48">
+          <Progress value={progressPct} className="h-2.5" />
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {badges.map((b) => (
+          <div
+            key={b._id}
+            className={`p-4 rounded-xl border transition-all ${
+              b.isUnlocked
+                ? "bg-card border-primary/30 shadow-sm"
+                : "bg-muted/30 border-dashed border-border opacity-60"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <span className={`text-3xl p-2 rounded-xl shrink-0 ${b.isUnlocked ? "bg-primary/10" : "grayscale opacity-50"}`}>
+                {b.icon || "🎖️"}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <p className="font-semibold text-sm truncate">{b.title}</p>
+                  {b.isUnlocked ? (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-success bg-success/10 px-2 py-0.5 rounded-full">
+                      Unlocked
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                      Locked
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{b.description}</p>
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/40 text-[11px]">
+                  <span className="text-primary font-medium">+{b.pointsReward} pts</span>
+                  {b.unlockedAt ? (
+                    <span className="text-muted-foreground">
+                      {new Date(b.unlockedAt).toLocaleDateString()}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

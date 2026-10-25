@@ -16,6 +16,8 @@ const {
   submitExamSession,
   getExamSession,
   listSubmittedExamScores,
+  listMyExamSessions,
+  getExamSessionReview,
 } = require("../controllers/exams.controller");
 const { protect, requireRole } = require("../middleware/auth");
 const { resolveTenant } = require("../middleware/tenant");
@@ -30,6 +32,8 @@ router.get("/admin/submitted-scores", protect, requireRole("admin"), listSubmitt
 router.get("/", protect, listExams);
 router.post("/", protect, requireRole("admin"), createExam);
 router.get("/assigned/me", protect, requireRole("student"), listStudentExams);
+router.get("/sessions/my-history", protect, requireRole("student"), listMyExamSessions);
+router.get("/sessions/:sessionId/review", protect, requireRole("student"), getExamSessionReview);
 router.post("/entry/validate", protect, requireRole("student"), validateExamCodeEntry);
 
 router.get("/:examId", protect, getExamById);

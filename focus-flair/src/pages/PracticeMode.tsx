@@ -62,6 +62,13 @@ type AttemptResponse = {
   newlyUnlocked?: Difficulty[];
   newlyCleared?: Difficulty[];
   shouldAdvanceToDifficulty?: Difficulty | null;
+  newlyUnlockedBadges?: Array<{
+    _id: string;
+    title: string;
+    description: string;
+    pointsReward: number;
+    icon: string;
+  }>;
 };
 
 type DifficultyProgressItem = {
@@ -247,6 +254,15 @@ export default function PracticeMode() {
           toast({
             title: `${level.toUpperCase()} unlocked`,
             description: `You can now practice ${level.toUpperCase()} questions for this topic.`,
+          });
+        });
+      }
+
+      if ((res as any).newlyUnlockedBadges?.length) {
+        (res as any).newlyUnlockedBadges.forEach((badge: any) => {
+          toast({
+            title: `🏆 Badge Unlocked: ${badge.title}`,
+            description: `${badge.description} (+${badge.pointsReward} bonus points!)`,
           });
         });
       }

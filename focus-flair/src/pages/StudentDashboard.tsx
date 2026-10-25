@@ -160,8 +160,8 @@ export default function StudentDashboard() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {dashboardData.topicStats.slice(0, 6).map((topic: any) => {
-            const topicName = topic.topicId?.name || "Unknown";
-            const icon = ["⚙️", "🌡️", "⚡", "🔬", "📐", "∫"][Math.floor(Math.random() * 6)];
+            const topicName = topic.topicId?.topicName || topic.topicId?.name || "Topic";
+            const icon = topic.topicId?.icon || ["⚙️", "🌡️", "⚡", "🔬", "📐", "∫"][(topicName.charCodeAt(0) || 0) % 6];
             return (
               <Link key={topic._id} to="/student/practice" className="stat-card space-y-4 cursor-pointer group">
                 <div className="flex items-center justify-between">

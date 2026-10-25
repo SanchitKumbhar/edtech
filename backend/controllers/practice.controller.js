@@ -522,6 +522,14 @@ const submitPracticeAttempt = asyncHandler(async (req, res) => {
       ? "hard"
       : null;
 
+  let newlyUnlockedBadges = [];
+  try {
+    const { evaluateBadges } = require("../utils/badgeService");
+    newlyUnlockedBadges = await evaluateBadges(req.user._id);
+  } catch (err) {
+    console.error("Error evaluating badges during practice attempt:", err);
+  }
+
   res.status(201).json({
     attempt,
     stat,
@@ -540,6 +548,7 @@ const submitPracticeAttempt = asyncHandler(async (req, res) => {
     newlyUnlocked,
     newlyCleared,
     shouldAdvanceToDifficulty,
+    newlyUnlockedBadges,
   });
 });
 
