@@ -39,8 +39,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background px-4 py-10 flex items-center justify-center">
-      <div className="w-full max-w-md glass-card rounded-2xl p-6 md:p-8 space-y-5 animate-fade-in">
+    <div className="min-h-screen bg-background relative overflow-hidden px-4 py-10 flex items-center justify-center">
+      {/* Ambient background glows for realistic glassy refraction */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary/20 blur-[130px]" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-purple-600/15 blur-[140px]" />
+      </div>
+      <div className="w-full max-w-md glass-card rounded-2xl p-6 md:p-8 space-y-5 animate-fade-in relative z-10">
         <div>
           <h1 className="text-2xl font-bold">Login</h1>
           <p className="text-sm text-muted-foreground mt-1">Access your exam preparation portal</p>

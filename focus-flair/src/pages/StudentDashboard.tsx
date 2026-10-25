@@ -46,106 +46,112 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl animate-fade-in">
+    <div className="space-y-8 max-w-7xl animate-fade-in pb-12">
       {/* Header */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Welcome back, {user?.fullName}! 👋</h1>
-        <p className="text-muted-foreground mt-1">Here's your preparation overview</p>
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Welcome back, {user?.fullName}! 👋</h1>
+        <p className="text-muted-foreground mt-1 text-sm">Here's your real-time preparation overview and daily milestones</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {stats.map((s) => (
-          <div key={s.label} className="stat-card flex items-center gap-4">
-            <div className={`w-11 h-11 rounded-xl ${s.color} flex items-center justify-center shrink-0`}>
-              <s.icon className="w-5 h-5 text-primary-foreground" />
+          <div key={s.label} className="stat-card rounded-2xl p-5 border border-white/40 dark:border-white/10 flex items-center gap-4 shadow-lg">
+            <div className={`w-12 h-12 rounded-2xl ${s.color} flex items-center justify-center shrink-0 shadow-md`}>
+              <s.icon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{s.value}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
+              <p className="text-2xl font-extrabold tracking-tight">{s.value}</p>
+              <p className="text-xs font-medium text-muted-foreground mt-0.5">{s.label}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-1 gap-6">
+      <div className="grid lg:grid-cols-2 gap-6">
         {/* Leaderboard Preview */}
-        <div className="glass-card rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-lg">🏆 Leaderboard</h2>
-            <Link to="/student/leaderboard" className="text-sm text-primary hover:underline flex items-center gap-1">
+        <div className="glass-panel rounded-3xl p-6 md:p-7 border border-white/50 dark:border-white/10 shadow-xl space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-lg tracking-tight">🏆 Leaderboard Standings</h2>
+            <Link to="/student/leaderboard" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
               Full rankings <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {dashboardData.leaderboardPreview.slice(0, 5).map((entry: any) => {
               const isCurrentUser = entry.studentId === user?._id;
               return (
                 <div
                   key={entry._id}
-                  className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                    isCurrentUser ? "bg-primary/10 border border-primary/20" : "bg-muted/50"
+                  className={`flex items-center justify-between p-3.5 rounded-2xl transition-colors ${
+                    isCurrentUser ? "bg-primary/15 border border-primary/30 shadow-sm" : "bg-card/60 border border-white/30 dark:border-white/10"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                      entry.rankNo <= 3 ? "gradient-accent text-accent-foreground" : "bg-muted text-muted-foreground"
+                    <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold ${
+                      entry.rankNo <= 3 ? "gradient-accent text-accent-foreground shadow-sm" : "bg-muted text-muted-foreground"
                     }`}>
-                      {entry.rankNo}
+                      #{entry.rankNo}
                     </span>
-                    <span className="text-sm font-medium">{entry.name}{isCurrentUser ? " (You)" : ""}</span>
+                    <span className="text-sm font-bold text-foreground">{entry.name}{isCurrentUser ? " (You)" : ""}</span>
                   </div>
-                  <span className="text-sm font-semibold">{entry.points?.toLocaleString() || 0} pts</span>
+                  <span className="text-sm font-extrabold text-foreground">{entry.points?.toLocaleString() || 0} <span className="text-xs font-normal text-muted-foreground">pts</span></span>
                 </div>
               );
             })}
           </div>
         </div>
-      </div>
 
-      {/* Notices */}
-      <div className="glass-card rounded-xl p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <Bell className="w-4 h-4 text-primary" />
-          <h2 className="font-semibold text-lg">Notices</h2>
-        </div>
-        <div className="space-y-3">
-          {dashboardData.notices.slice(0, 5).map((notice: any) => (
-            <div key={notice._id} className="p-3 rounded-lg bg-muted/50">
-              <p className="text-sm font-medium leading-snug">{notice.title}</p>
-              <p className="text-xs text-muted-foreground mt-1">{new Date(notice.publishAt).toLocaleDateString()}</p>
+        {/* Notices */}
+        <div className="glass-panel rounded-3xl p-6 md:p-7 border border-white/50 dark:border-white/10 shadow-xl space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+              <Bell className="w-4 h-4" />
             </div>
-          ))}
+            <h2 className="font-bold text-lg tracking-tight">Institute Notices</h2>
+          </div>
+          <div className="space-y-2.5">
+            {dashboardData.notices.length ? (
+              dashboardData.notices.slice(0, 5).map((notice: any) => (
+                <div key={notice._id} className="p-3.5 rounded-2xl bg-card/60 border border-white/30 dark:border-white/10">
+                  <p className="text-sm font-semibold leading-snug">{notice.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{new Date(notice.publishAt).toLocaleDateString()}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground py-8 text-center">No current announcements.</p>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Link to="/student/practice" className="stat-card flex items-center gap-4 group">
-          <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center">
-            <Play className="w-5 h-5 text-primary-foreground" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <Link to="/student/practice" className="glass-card rounded-2xl p-5 border border-white/40 dark:border-white/10 flex items-center gap-4 group hover:border-primary/50 hover:shadow-lg transition-all">
+          <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-md">
+            <Play className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="font-semibold group-hover:text-primary transition-colors">Start Practice</p>
-            <p className="text-xs text-muted-foreground">Continue where you left off</p>
+            <p className="font-bold text-base group-hover:text-primary transition-colors">Start Practice</p>
+            <p className="text-xs text-muted-foreground">Topic drills & daily streaks</p>
           </div>
         </Link>
-        <Link to="/student/analytics" className="stat-card flex items-center gap-4 group">
-          <div className="w-11 h-11 rounded-xl gradient-success flex items-center justify-center">
-            <Eye className="w-5 h-5 text-primary-foreground" />
+        <Link to="/student/analytics" className="glass-card rounded-2xl p-5 border border-white/40 dark:border-white/10 flex items-center gap-4 group hover:border-primary/50 hover:shadow-lg transition-all">
+          <div className="w-12 h-12 rounded-2xl gradient-success flex items-center justify-center shadow-md">
+            <Eye className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="font-semibold group-hover:text-primary transition-colors">View Performance</p>
-            <p className="text-xs text-muted-foreground">Track your progress</p>
+            <p className="font-bold text-base group-hover:text-primary transition-colors">View Performance</p>
+            <p className="text-xs text-muted-foreground">Accuracy trends & weak areas</p>
           </div>
         </Link>
-        <Link to="/student/pyq" className="stat-card flex items-center gap-4 group">
-          <div className="w-11 h-11 rounded-xl gradient-accent flex items-center justify-center">
-            <BookOpen className="w-5 h-5 text-primary-foreground" />
+        <Link to="/student/pyq" className="glass-card rounded-2xl p-5 border border-white/40 dark:border-white/10 flex items-center gap-4 group hover:border-primary/50 hover:shadow-lg transition-all">
+          <div className="w-12 h-12 rounded-2xl gradient-accent flex items-center justify-center shadow-md">
+            <BookOpen className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="font-semibold group-hover:text-primary transition-colors">PYQ Section</p>
-            <p className="text-xs text-muted-foreground">Previous year questions</p>
+            <p className="font-bold text-base group-hover:text-primary transition-colors">PYQ Papers</p>
+            <p className="text-xs text-muted-foreground">Official previous year papers</p>
           </div>
         </Link>
       </div>

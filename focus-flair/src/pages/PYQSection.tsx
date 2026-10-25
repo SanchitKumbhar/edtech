@@ -238,7 +238,7 @@ export default function PYQSection() {
         <select
           value={yearFilter}
           onChange={(e) => setYearFilter(e.target.value)}
-          className="h-10 rounded-md border border-input bg-background px-3 text-sm min-w-[130px]"
+          className="h-10 rounded-xl border border-input/80 bg-background/70 backdrop-blur-md px-3.5 text-sm min-w-[130px] font-medium shadow-sm focus:ring-2 focus:ring-primary/30 outline-none"
         >
           <option value="all">All Years</option>
           {years.map((year) => (
@@ -251,7 +251,7 @@ export default function PYQSection() {
         <select
           value={examFilter}
           onChange={(e) => setExamFilter(e.target.value)}
-          className="h-10 rounded-md border border-input bg-background px-3 text-sm min-w-[180px]"
+          className="h-10 rounded-xl border border-input/80 bg-background/70 backdrop-blur-md px-3.5 text-sm min-w-[180px] font-medium shadow-sm focus:ring-2 focus:ring-primary/30 outline-none"
         >
           <option value="all">All Exams</option>
           {examNames.map((name) => (
@@ -261,52 +261,52 @@ export default function PYQSection() {
           ))}
         </select>
 
-        <span className="text-xs text-muted-foreground ml-auto">
+        <span className="text-xs font-medium text-muted-foreground ml-auto bg-muted/60 px-3 py-1.5 rounded-full border border-border/50">
           Showing {filtered.length} paper{filtered.length === 1 ? "" : "s"}
         </span>
       </div>
 
       {/* Grid of PYQs */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.length ? (
           filtered.map((set) => (
             <div
               key={set._id}
-              className="stat-card flex flex-col justify-between border hover:border-primary/40 transition-all group"
+              className="glass-card rounded-3xl p-6 flex flex-col justify-between border border-white/40 dark:border-white/10 hover:border-primary/50 transition-all duration-300 group shadow-lg hover:shadow-xl hover:-translate-y-1"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider bg-primary/10 text-primary px-2.5 py-0.5 rounded-full">
+                  <span className="text-xs font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/20 px-3 py-0.5 rounded-full">
                     {set.examName || "Exam"}
                   </span>
-                  <span className="text-xs font-semibold text-muted-foreground">{set.examYear}</span>
+                  <span className="text-xs font-bold text-muted-foreground">{set.examYear}</span>
                 </div>
 
-                <h3 className="font-bold text-base leading-snug group-hover:text-primary transition-colors">
+                <h3 className="font-bold text-lg leading-snug group-hover:text-primary transition-colors">
                   {set.title || "Untitled Paper"}
                 </h3>
 
-                <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
+                <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
                   {set.description || `Official questions from ${set.examName} ${set.examYear} on ${set.subject}.`}
                 </p>
 
-                <div className="flex items-center gap-4 mt-4 pt-3 border-t border-border/50 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <FileText className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-4 mt-5 pt-3 border-t border-border/50 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1 font-medium">
+                    <FileText className="w-3.5 h-3.5 text-primary" />
                     {set.questions?.length || 1} questions
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5" />
+                  <span className="flex items-center gap-1 font-medium">
+                    <Clock className="w-3.5 h-3.5 text-indigo-500" />
                     {set.durationMinutes || 180} min
                   </span>
-                  <span className="ml-auto font-medium text-foreground">{set.subject}</span>
+                  <span className="ml-auto font-semibold text-foreground px-2 py-0.5 rounded-md bg-muted/70 text-[11px]">{set.subject}</span>
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-border/40 flex items-center justify-between gap-2">
+              <div className="mt-6 pt-3.5 border-t border-border/40 flex items-center justify-between gap-2">
                 <Button
                   size="sm"
-                  className="flex-1 gradient-primary text-primary-foreground text-xs font-semibold"
+                  className="flex-1 gradient-primary text-primary-foreground text-xs font-bold rounded-xl py-2 shadow-md shadow-primary/20"
                   onClick={() => handleOpenPdf(set)}
                   title={set.pdfFileName ? `Open ${set.pdfFileName}` : "Open PDF"}
                 >
@@ -318,7 +318,7 @@ export default function PYQSection() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-xs px-2"
+                      className="text-xs px-2.5 rounded-xl hover:bg-muted"
                       onClick={() =>
                         togglePublishMutation.mutate({ id: set._id, isPublished: !set.isPublished })
                       }
@@ -328,7 +328,7 @@ export default function PYQSection() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-destructive px-2"
+                      className="text-destructive px-2.5 rounded-xl hover:bg-destructive/10"
                       onClick={() => {
                         if (confirm(`Delete "${set.title}"?`)) {
                           deletePyqMutation.mutate(set._id);
@@ -343,7 +343,7 @@ export default function PYQSection() {
             </div>
           ))
         ) : (
-          <div className="col-span-full py-12 text-center text-muted-foreground glass-card rounded-xl">
+          <div className="col-span-full py-16 text-center text-muted-foreground glass-panel rounded-3xl border border-dashed border-border">
             No PYQ sets found matching your filter criteria.
           </div>
         )}

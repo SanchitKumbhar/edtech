@@ -62,26 +62,26 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl animate-fade-in">
+    <div className="space-y-8 max-w-7xl animate-fade-in pb-12">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Admin Dashboard 🛠️</h1>
-        <p className="text-muted-foreground mt-1">Manage exams, students, and monitoring</p>
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Admin Dashboard 🛠️</h1>
+        <p className="text-muted-foreground mt-1 text-sm">Real-time overview of examinations, candidates, and institute operations</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         {[
           { label: "Total Students", value: dashboardData.stats.totalStudents, icon: Users, color: "gradient-primary" },
           { label: "Active Exams", value: dashboardData.stats.activeExams, icon: FileText, color: "gradient-success" },
           { label: "Ongoing Sessions", value: dashboardData.stats.ongoingSessions, icon: Activity, color: "gradient-accent" },
         ].map((s) => (
-          <div key={s.label} className="stat-card flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl ${s.color} flex items-center justify-center`}>
-              <s.icon className="w-5 h-5 text-primary-foreground" />
+          <div key={s.label} className="stat-card rounded-2xl p-6 border border-white/40 dark:border-white/10 flex items-center gap-5 shadow-lg">
+            <div className={`w-14 h-14 rounded-2xl ${s.color} flex items-center justify-center shrink-0 shadow-md`}>
+              <s.icon className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-3xl font-bold">{s.value}</p>
-              <p className="text-sm text-muted-foreground">{s.label}</p>
+              <p className="text-3xl font-extrabold tracking-tight">{s.value}</p>
+              <p className="text-xs font-medium text-muted-foreground mt-0.5">{s.label}</p>
             </div>
           </div>
         ))}
@@ -90,54 +90,59 @@ export default function AdminDashboard() {
       {/* Actions */}
       <div className="flex flex-wrap gap-3">
         <Link to="/admin/create-exam">
-          <Button className="gradient-primary text-primary-foreground">
+          <Button className="gradient-primary text-primary-foreground font-semibold rounded-xl shadow-md shadow-primary/25 px-5">
             <PlusCircle className="w-4 h-4 mr-2" /> Create Exam
           </Button>
         </Link>
         <Link to="/admin/exam-scores">
-          <Button variant="outline">
-            <FileText className="w-4 h-4 mr-2" /> Submitted Exam Scores
+          <Button variant="outline" className="glass-card rounded-xl border-border/80 font-medium">
+            <FileText className="w-4 h-4 mr-2 text-primary" /> Submitted Exam Scores
           </Button>
         </Link>
         <Link to="/admin/create-practice">
-          <Button variant="outline">
-            <PlusCircle className="w-4 h-4 mr-2" /> Create Practice Questions
+          <Button variant="outline" className="glass-card rounded-xl border-border/80 font-medium">
+            <PlusCircle className="w-4 h-4 mr-2 text-primary" /> Create Practice Questions
           </Button>
         </Link>
-        <Button variant="outline" onClick={() => setUploadModalOpen(true)}>
-          <Upload className="w-4 h-4 mr-2" /> Upload Questions
+        <Button variant="outline" className="glass-card rounded-xl border-border/80 font-medium" onClick={() => setUploadModalOpen(true)}>
+          <Upload className="w-4 h-4 mr-2 text-primary" /> Upload Questions
         </Button>
         <Link to="/admin/post-notice">
-          <Button variant="outline">
-            <Bell className="w-4 h-4 mr-2" /> Post Notice
+          <Button variant="outline" className="glass-card rounded-xl border-border/80 font-medium">
+            <Bell className="w-4 h-4 mr-2 text-primary" /> Post Notice
           </Button>
         </Link>
       </div>
 
       {/* Exam Table */}
-      <div className="glass-card rounded-xl p-5">
-        <h2 className="font-semibold text-lg mb-4">Recent Exams</h2>
+      <div className="glass-panel rounded-3xl p-6 md:p-8 border border-white/50 dark:border-white/10 shadow-xl space-y-5">
+        <div className="flex items-center justify-between">
+          <h2 className="font-bold text-xl tracking-tight">Recent Examinations</h2>
+          <span className="text-xs font-medium text-muted-foreground bg-muted/60 px-3 py-1 rounded-full border border-border/40">
+            Latest {dashboardData.recentExams.slice(0, 10).length} exams
+          </span>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-muted-foreground border-b">
-                <th className="pb-3 font-medium">Name</th>
-                <th className="pb-3 font-medium">Type</th>
-                <th className="pb-3 font-medium">Status</th>
-                <th className="pb-3 font-medium">Duration</th>
+              <tr className="text-left text-muted-foreground border-b border-border/60">
+                <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Exam Title</th>
+                <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Type</th>
+                <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Status</th>
+                <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Duration</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border/40">
               {dashboardData.recentExams.slice(0, 10).map((e) => (
-                <tr key={e._id} className="border-b border-border/50 hover:bg-muted/30">
-                  <td className="py-3 font-medium">{e.title}</td>
-                  <td className="py-3 text-muted-foreground">{e.examType || "Standard"}</td>
-                  <td className="py-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(e.status)}`}>
+                <tr key={e._id} className="hover:bg-muted/30 transition-colors">
+                  <td className="py-3.5 font-semibold text-foreground">{e.title}</td>
+                  <td className="py-3.5 text-muted-foreground">{e.examType || "Standard"}</td>
+                  <td className="py-3.5">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-border/40 ${getStatusColor(e.status)}`}>
                       {e.status.charAt(0).toUpperCase() + e.status.slice(1)}
                     </span>
                   </td>
-                  <td className="py-3">{e.durationMinutes} min</td>
+                  <td className="py-3.5 text-muted-foreground font-medium">{e.durationMinutes} min</td>
                 </tr>
               ))}
             </tbody>

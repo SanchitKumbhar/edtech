@@ -131,55 +131,61 @@ export default function LiveMonitoring() {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl animate-fade-in">
-      <div className="flex items-center gap-3">
-        <Monitor className="w-6 h-6 text-primary" />
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Live Monitoring</h1>
-          <p className="text-muted-foreground">{data.exam.title} - {data.activeSessions.length} students active</p>
+    <div className="space-y-8 max-w-7xl animate-fade-in pb-12">
+      <div className="flex items-center gap-3.5">
+        <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-sm">
+          <Monitor className="w-6 h-6" />
         </div>
-        <span className="ml-auto flex items-center gap-1.5 text-sm">
-          <span className="w-2 h-2 rounded-full bg-success animate-pulse" /> Live
-        </span>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Live Proctoring & Monitoring</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">{data.exam.title} &bull; <span className="text-foreground font-semibold">{data.activeSessions.length} active candidate{data.activeSessions.length === 1 ? "" : "s"}</span></p>
+        </div>
+        <div className="ml-auto flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 font-bold text-xs shadow-sm">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" /> LIVE STREAM
+        </div>
       </div>
 
-      <div className="glass-card rounded-xl p-4">
+      <div className="glass-panel rounded-2xl p-4 sm:p-5 border border-white/50 dark:border-white/10 shadow-lg">
         <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm font-medium">Select Exam</p>
+          <p className="text-sm font-semibold">Active Exam Filter:</p>
           <select
             value={activeExamId}
             onChange={(e) => setSelectedExamId(e.target.value)}
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm min-w-[280px]"
+            className="h-10 rounded-xl border border-input/80 bg-background/70 backdrop-blur-md px-3.5 text-sm min-w-[280px] font-medium shadow-sm focus:ring-2 focus:ring-primary/30 outline-none"
           >
             {exams.map((exam) => (
-              <option key={exam._id} value={exam._id}>{exam.title} ({exam.status})</option>
+              <option key={exam._id} value={exam._id}>{exam.title} ({exam.status.toUpperCase()})</option>
             ))}
           </select>
         </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 glass-card rounded-xl p-5">
-          <h2 className="font-semibold mb-4">Active Sessions</h2>
+        <div className="lg:col-span-2 glass-panel rounded-3xl p-6 md:p-8 border border-white/50 dark:border-white/10 shadow-xl space-y-5">
+          <h2 className="font-bold text-xl tracking-tight">Active Candidate Sessions</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-muted-foreground border-b">
-                  <th className="pb-3 font-medium">Name</th>
-                  <th className="pb-3 font-medium">Email</th>
-                  <th className="pb-3 font-medium">Warnings</th>
-                  <th className="pb-3 font-medium">Tab Switches</th>
+                <tr className="text-left text-muted-foreground border-b border-border/60">
+                  <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Candidate Name</th>
+                  <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Email</th>
+                  <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Warnings</th>
+                  <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Tab Switches</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-border/40">
                 {data.activeSessions.map((session) => {
                   const warnings = session.warningCount || 0;
                   return (
-                    <tr key={session._id} className={`border-b border-border/50 ${warnings >= 3 ? "bg-destructive/5" : ""}`}>
-                      <td className="py-3 font-medium">{session.studentId?.fullName || "Student"}</td>
-                      <td className="py-3 text-muted-foreground">{session.studentId?.email || "N/A"}</td>
-                      <td className={`py-3 ${warnings >= 3 ? "text-destructive font-semibold" : ""}`}>{warnings}</td>
-                      <td className="py-3">{session.tabSwitchCount || 0}</td>
+                    <tr key={session._id} className={`hover:bg-muted/30 transition-colors ${warnings >= 3 ? "bg-destructive/10" : ""}`}>
+                      <td className="py-3.5 font-semibold text-foreground">{session.studentId?.fullName || "Student"}</td>
+                      <td className="py-3.5 text-muted-foreground">{session.studentId?.email || "N/A"}</td>
+                      <td className={`py-3.5 ${warnings >= 3 ? "text-destructive font-bold" : "text-foreground font-medium"}`}>
+                        <span className={warnings >= 3 ? "bg-destructive/20 px-2 py-0.5 rounded-full text-xs" : ""}>
+                          {warnings}
+                        </span>
+                      </td>
+                      <td className="py-3.5 text-muted-foreground font-medium">{session.tabSwitchCount || 0}</td>
                     </tr>
                   );
                 })}
@@ -188,63 +194,64 @@ export default function LiveMonitoring() {
           </div>
         </div>
 
-        <div className="glass-card rounded-xl p-5">
-          <h2 className="font-semibold mb-4 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-destructive" /> Recent Events
+        <div className="glass-panel rounded-3xl p-6 border border-white/50 dark:border-white/10 shadow-xl space-y-4">
+          <h2 className="font-bold text-lg tracking-tight flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-destructive" /> Real-time Security Log
           </h2>
           <div className="space-y-3">
             {warningLogs.length ? (
               warningLogs.map((log) => (
                 <div
                   key={log._id}
-                  className={`p-3 rounded-lg border ${
+                  className={`p-3.5 rounded-2xl border transition-all ${
                     log.severity === "high"
-                      ? "border-destructive/30 bg-destructive/5"
+                      ? "border-destructive/30 bg-destructive/10 shadow-sm"
                       : log.severity === "medium"
-                      ? "border-warning/30 bg-warning/5"
-                      : "border-border bg-muted/30"
+                      ? "border-warning/30 bg-warning/10 shadow-sm"
+                      : "border-border/60 bg-muted/40"
                   }`}
                 >
-                  <p className="text-sm font-medium">{log.studentId?.fullName || "Student"}</p>
-                  <p className="text-xs text-muted-foreground">{log.eventType}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{new Date(log.occurredAt).toLocaleString()}</p>
+                  <p className="text-sm font-bold text-foreground">{log.studentId?.fullName || "Student"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{log.eventType}</p>
+                  <p className="text-[11px] text-muted-foreground/80 mt-1.5">{new Date(log.occurredAt).toLocaleTimeString()}</p>
                 </div>
               ))
             ) : (
-              <div className="text-sm text-muted-foreground flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-success" /> No warning events yet.
+              <div className="text-sm text-muted-foreground flex items-center gap-2 py-6 justify-center">
+                <CheckCircle className="w-4 h-4 text-emerald-500" /> Proctoring normal. No alerts.
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="glass-card rounded-xl p-5">
-        <h2 className="font-semibold mb-4">Auto-Submitted Sessions</h2>
+      <div className="glass-panel rounded-3xl p-6 md:p-8 border border-white/50 dark:border-white/10 shadow-xl space-y-5">
+        <h2 className="font-bold text-xl tracking-tight">Auto-Submitted Disqualified Sessions</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-muted-foreground border-b">
-                <th className="pb-3 font-medium">Name</th>
-                <th className="pb-3 font-medium">Email</th>
-                <th className="pb-3 font-medium">Submitted At</th>
-                <th className="pb-3 font-medium">Tab Switches</th>
-                <th className="pb-3 font-medium">Action</th>
+              <tr className="text-left text-muted-foreground border-b border-border/60">
+                <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Candidate Name</th>
+                <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Email</th>
+                <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Submission Time</th>
+                <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Tab Switches</th>
+                <th className="pb-3 font-semibold text-xs uppercase tracking-wider">Administrative Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border/40">
               {(data.autoSubmittedSessions || []).map((session) => (
-                <tr key={session._id} className="border-b border-border/50">
-                  <td className="py-3 font-medium">{session.studentId?.fullName || "Student"}</td>
-                  <td className="py-3 text-muted-foreground">{session.studentId?.email || "N/A"}</td>
-                  <td className="py-3 text-muted-foreground">
+                <tr key={session._id} className="hover:bg-muted/30 transition-colors">
+                  <td className="py-3.5 font-semibold text-foreground">{session.studentId?.fullName || "Student"}</td>
+                  <td className="py-3.5 text-muted-foreground">{session.studentId?.email || "N/A"}</td>
+                  <td className="py-3.5 text-muted-foreground text-xs font-medium">
                     {session.submittedAt ? new Date(session.submittedAt).toLocaleString() : "-"}
                   </td>
-                  <td className="py-3">{session.tabSwitchCount || 0}</td>
-                  <td className="py-3">
+                  <td className="py-3.5 text-muted-foreground font-semibold">{session.tabSwitchCount || 0}</td>
+                  <td className="py-3.5">
                     <Button
                       size="sm"
                       variant="outline"
+                      className="glass-card rounded-xl border-border/80 text-xs font-semibold hover:border-primary/50"
                       disabled={revertMutation.isPending}
                       onClick={() => {
                         setConfirmRevertSessionId(session._id);
@@ -259,7 +266,7 @@ export default function LiveMonitoring() {
           </table>
 
           {!data.autoSubmittedSessions?.length ? (
-            <p className="text-sm text-muted-foreground py-4">No auto-submitted sessions for this exam.</p>
+            <p className="text-sm text-muted-foreground py-6 text-center">No auto-submitted disqualified sessions for this exam.</p>
           ) : null}
         </div>
       </div>

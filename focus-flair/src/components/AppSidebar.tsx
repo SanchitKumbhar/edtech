@@ -77,17 +77,17 @@ export function AppSidebar() {
   };
   const sidebarContent = (
     <>
-      <div className="p-5 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
+      <div className="p-5 flex items-center gap-3 border-b border-sidebar-border/30">
+        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30 shrink-0">
           <GraduationCap className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-sm font-bold text-sidebar-accent-foreground truncate">ExamPrep</h1>
-          <p className="text-xs text-sidebar-foreground/50 capitalize">{role} Portal</p>
+          <h1 className="text-base font-extrabold text-sidebar-accent-foreground tracking-tight truncate">FocusFlair</h1>
+          <p className="text-[11px] font-medium text-sidebar-foreground/60 uppercase tracking-wider">{role} Portal</p>
         </div>
       </div>
 
-      <nav className="flex-1 px-3 space-y-1">
+      <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
         {nav.map((item) => (
           <Link
             key={item.path}
@@ -101,7 +101,7 @@ export function AppSidebar() {
         ))}
         <button
           onClick={handleLogout}
-          className="nav-item w-full flex items-center gap-2 mt-4 text-destructive hover:bg-destructive/10"
+          className="nav-item w-full flex items-center gap-2 mt-4 text-destructive hover:bg-destructive/15 transition-all"
         >
           <X className="w-4.5 h-4.5 shrink-0" />
           <span className="text-sm">Logout</span>
@@ -117,7 +117,7 @@ export function AppSidebar() {
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed top-4 left-4 z-50 lg:hidden w-10 h-10 rounded-lg bg-card shadow-lg flex items-center justify-center border border-border"
+        className="fixed top-4 left-4 z-50 lg:hidden w-10 h-10 rounded-xl glass-card flex items-center justify-center border border-white/20 shadow-lg text-foreground"
       >
         <Menu className="w-5 h-5" />
       </button>
@@ -125,20 +125,20 @@ export function AppSidebar() {
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-foreground/30 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 lg:hidden transition-opacity"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen w-64 bg-sidebar flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed top-0 left-0 h-screen w-64 bg-sidebar/90 backdrop-blur-2xl border-r border-sidebar-border/40 flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:sticky lg:top-0`}
+        } lg:sticky lg:top-0 shadow-2xl`}
       >
         <button
           onClick={() => setMobileOpen(false)}
-          className="absolute top-4 right-4 lg:hidden text-sidebar-foreground/50 hover:text-sidebar-foreground"
+          className="absolute top-4 right-4 lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground p-1 rounded-lg"
         >
           <X className="w-5 h-5" />
         </button>
@@ -146,24 +146,24 @@ export function AppSidebar() {
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/70 bg-card/95 backdrop-blur-xl lg:hidden">
-        <nav className="grid grid-cols-5">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-card/85 backdrop-blur-2xl lg:hidden shadow-2xl">
+        <nav className="grid grid-cols-5 px-1 py-1">
           {mobileNav.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               className={`mobile-nav-item ${isActive(item.path) ? "mobile-nav-item-active" : ""}`}
             >
-              <item.icon className="w-4 h-4" />
+              <item.icon className="w-4.5 h-4.5" />
               <span>{item.label}</span>
             </Link>
           ))}
           <button
             onClick={handleLogout}
-            className="mobile-nav-item text-destructive"
+            className="mobile-nav-item text-destructive hover:bg-destructive/10 rounded-lg"
             style={{ border: "none", background: "none" }}
           >
-            <X className="w-4 h-4" />
+            <X className="w-4.5 h-4.5" />
             <span>Logout</span>
           </button>
         </nav>

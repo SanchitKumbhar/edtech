@@ -103,30 +103,37 @@ export default function Register() {
     studentRegisterMutation.isPending || instituteRegisterMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-background px-4 py-10 flex items-center justify-center">
-      <div className="w-full max-w-xl glass-card rounded-2xl p-6 md:p-8 space-y-6 animate-fade-in border shadow-lg">
+    <div className="min-h-screen bg-background relative overflow-hidden px-4 py-10 flex items-center justify-center">
+      {/* Ambient background glows for realistic glassy refraction */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary/20 blur-[130px]" />
+        <div className="absolute top-1/2 -right-32 w-96 h-96 rounded-full bg-indigo-500/15 blur-[140px]" />
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-purple-600/15 blur-[140px]" />
+      </div>
+
+      <div className="w-full max-w-xl glass-card rounded-3xl p-6 md:p-8 space-y-6 animate-fade-in relative z-10 border border-white/40 dark:border-white/10 shadow-2xl backdrop-blur-2xl">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Create Focus Flair Account</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Create Focus Flair Account</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Multi-Institute examination & learning platform
           </p>
         </div>
 
         {/* Account Type Selector Tabs */}
-        <div className="grid grid-cols-2 gap-2 p-1 bg-muted rounded-xl">
+        <div className="grid grid-cols-2 gap-2 p-1.5 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/50">
           <button
             type="button"
             onClick={() => {
               setAccountType("student");
               setError(null);
             }}
-            className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-all ${
+            className={`flex items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-xl transition-all ${
               accountType === "student"
-                ? "bg-background text-foreground shadow-sm"
+                ? "bg-background text-foreground shadow-md shadow-primary/10 border border-white/50 dark:border-white/10"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <GraduationCap className="w-4 h-4" />
+            <GraduationCap className="w-4 h-4 text-primary" />
             Student Account
           </button>
           <button
@@ -135,13 +142,13 @@ export default function Register() {
               setAccountType("institute_admin");
               setError(null);
             }}
-            className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-all ${
+            className={`flex items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-xl transition-all ${
               accountType === "institute_admin"
-                ? "bg-background text-foreground shadow-sm"
+                ? "bg-background text-foreground shadow-md shadow-primary/10 border border-white/50 dark:border-white/10"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Building2 className="w-4 h-4" />
+            <Building2 className="w-4 h-4 text-primary" />
             New Institute (Admin)
           </button>
         </div>
